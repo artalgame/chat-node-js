@@ -4,7 +4,7 @@ var path = require('path');
 var config = require('./config');
 var log = require('./libs/log')(module);
 var mongo = require('mongoskin');
-var HttpError = require("error").HttpError;
+var HttpError = require("./error").HttpError;
 
 var dbConnection = mongo.db('mongodb://<alkor1@yandex.ru>:<mankind123>@paulo.mongohq.com:10072/chat');
 
@@ -21,9 +21,11 @@ app.use(express.bodyParser());
 
 app.use(express.cookieParser());
 
+app.use(require("./middleware/sendHttpError"));
+
 app.use(app.router);
 
-require("routes")(app);
+require("./routes")(app);
 
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -34,7 +36,7 @@ app.use(function(err, req, res, next){
     
     if(err instanceof HttpError){
         res.sendHttpError(err);
-    }esle {
+    }else {
         if(app.get('env') == 'development'){
             express.errorHandler()(err, req, res, next);
         }else{
