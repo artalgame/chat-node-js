@@ -1,0 +1,13 @@
+{
+    "port": "8080",
+    "mongoose":{
+        "uri": "mongodb://chat:mankind123@paulo.mongohq.com:10072/chat",
+        "options":{
+            "server":{
+                "socketOptions":{
+                    "keepAlive":1
+                }
+            }
+        }
+    }
+}
