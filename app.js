@@ -4,6 +4,7 @@ var path = require('path');
 var config = require('./config');
 var log = require('./libs/log')(module);
 var mongo = require('mongoskin');
+var mongoose = require('./libs/mongoose');
 var HttpError = require("./error").HttpError;
 
 var dbConnection = mongo.db('mongodb://<alkor1@yandex.ru>:<mankind123>@paulo.mongohq.com:10072/chat');
@@ -21,7 +22,18 @@ app.use(express.bodyParser());
 
 app.use(express.cookieParser());
 
+var MongoStore = require('connect-mongo')(express);
+
+app.use(express.session({
+    secret:"WhoIsWho",
+    key: config.get('session:key'),
+    cookie: config.get('session:cookie'),
+    store: new MongoStore({mongoose_connection: mongoose.connection})
+}));
+
+
 app.use(require("./middleware/sendHttpError"));
+app.use(require("./middleware/loadUser"));
 
 app.use(app.router);
 
