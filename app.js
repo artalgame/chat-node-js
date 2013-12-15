@@ -6,6 +6,7 @@ var log = require('./libs/log')(module);
 var mongo = require('mongoskin');
 var mongoose = require('./libs/mongoose');
 var HttpError = require("./error").HttpError;
+var sessionStore = require("./libs/sessionStore");
 
 var dbConnection = mongo.db('mongodb://<alkor1@yandex.ru>:<mankind123>@paulo.mongohq.com:10072/chat');
 
@@ -28,18 +29,18 @@ app.use(express.session({
     secret:"WhoIsWho",
     key: config.get('session:key'),
     cookie: config.get('session:cookie'),
-    store: new MongoStore({mongoose_connection: mongoose.connection})
+    store: sessionStore
 }));
 
 
 app.use(require("./middleware/sendHttpError"));
 app.use(require("./middleware/loadUser"));
 
+app.use(express.static(path.join(__dirname, './public')));
+
 app.use(app.router);
 
 require("./routes")(app);
-
-app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(function(err, req, res, next){
     if(typeof err == 'number') {
@@ -59,6 +60,11 @@ app.use(function(err, req, res, next){
     }
 });
 
-http.createServer(app).listen(app.get('port'), function(){
+var server = http.createServer(app);
+
+
+server.listen(app.get('port'), function(){
   log.info('Express server listening on port ' + app.get('port'));
 });
+
+var io = require('./socket')(server);
